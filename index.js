@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
-import { kv } from '@vercel/kv';
+import { createClient } from '@vercel/kv';
+const kv = createClient({ url: process.env.KV_URL });
 import puppeteer from 'puppeteer';
 
 const app = express();
