@@ -89,3 +89,8 @@ app.get('/scrape', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Scraper service listening on port ${PORT}`);
 });
+
+// Temporary debug endpoint
+app.get('/debug-env', (req, res) => {
+  res.send(`The secret key is: ${process.env.SCRAPE_SECRET_KEY}`);
+});
