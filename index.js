@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import { kv } from '@vercel/kv';
 import puppeteer from 'puppeteer';
