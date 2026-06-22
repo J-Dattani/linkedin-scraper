@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: linkedin-scraper-service
-    env: docker
-    repo: https://github.com/J-Dattani/linkedin-scraper.git
-    branch: main
-    healthCheckPath: /
-    envVars:
-      - fromGroup: linkedin-scraper-env
