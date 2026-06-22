@@ -1,5 +1,5 @@
 # Use a Node.js 18 base image that includes browser dependencies
-FROM mcr.microsoft.com/playwright/javascript:v1.39.0-jammy
+FROM mcr.microsoft.com/playwright:v1.42.1-jammy
 
 # Set the working directory
 WORKDIR /usr/src/app
