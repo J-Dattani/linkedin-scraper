@@ -1,18 +1,11 @@
 {
   "name": "linkedin-scraper",
   "version": "1.0.0",
-  "description": "Scrapes LinkedIn profile data and stores it in Vercel KV.",
+  "description": "Scrapes LinkedIn profile data.",
   "main": "index.js",
   "type": "module",
-  "scripts": {
-    "start": "node index.js"
-  },
-"dependencies": {
+  "dependencies": {
     "@vercel/kv": "^1.0.1",
-    "dotenv": "^16.3.1",
-    "puppeteer": "^21.3.8"
-  },
-  "engines": {
-    "node": "18.x"
+    "linkedin-profile-scraper": "^2.3.2"
   }
 }
