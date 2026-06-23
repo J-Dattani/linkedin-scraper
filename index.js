@@ -1,22 +1,26 @@
-import 'dotenv/config';
 import { createClient } from '@vercel/kv';
 import puppeteer from 'puppeteer';
 
-// Immediately-invoked function to run the scraper
-(async () => {
-  // Check for the required environment variable
+// This is the main function that runs our scraper
+async function runScraper() {
+  // Check if the required secret is available from GitHub Actions
   if (!process.env.KV_URL) {
-    console.error('FATAL: KV_URL environment variable is not defined.');
-    process.exit(1); // Exit with an error code
+    console.error('FATAL: KV_URL secret is not available in the GitHub Actions environment.');
+    process.exit(1); // Exit with an error
   }
 
-  const kv = createClient({ url: process.env.KV_URL });
+  // Create the database client using the secret
+  const kv = createClient({
+    url: process.env.KV_URL,
+    token: process.env.KV_TOKEN // Vercel KV now requires a token as well
+  });
 
   console.log('Scraping process started...');
 
+  let browser;
   try {
-    const browser = await puppeteer.launch({
-      headless: "new", // Use the new headless mode
+    browser = await puppeteer.launch({
+      headless: "new",
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
@@ -65,11 +69,17 @@ import puppeteer from 'puppeteer';
     console.log('Data extracted. Saving to KV store...');
     await kv.set('linkedin-profile-data', data);
 
-    await browser.close();
     console.log('Scraping process finished successfully.');
 
   } catch (error) {
     console.error('An error occurred during scraping:', error);
-    process.exit(1); // Exit with an error code
+    process.exit(1);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
-})();
+}
+
+// Run the scraper
+runScraper();
