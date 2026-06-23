@@ -10,11 +10,9 @@ async function runScraper() {
   }
 
   // Create the database client using the secret
-  const kv = createClient({
-    url: process.env.KV_URL,
-    token: process.env.KV_TOKEN // Vercel KV now requires a token as well
-  });
-
+const kv = createClient({
+  url: process.env.KV_URL
+});
   console.log('Scraping process started...');
 
   let browser;
