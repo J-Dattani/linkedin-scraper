@@ -1,32 +1,23 @@
 import 'dotenv/config';
-import express from 'express';
 import { createClient } from '@vercel/kv';
-const kv = createClient({ url: process.env.KV_URL });
 import puppeteer from 'puppeteer';
 
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-// The endpoint that will trigger the scrape
-app.get('/scrape', async (req, res) => {
-  // Simple secret to prevent unauthorized scrapes
-  if (req.headers['x-secret-key'] !== process.env.SCRAPE_SECRET_KEY) {
-    return res.status(401).send('Unauthorized');
+// Immediately-invoked function to run the scraper
+(async () => {
+  // Check for the required environment variable
+  if (!process.env.KV_URL) {
+    console.error('FATAL: KV_URL environment variable is not defined.');
+    process.exit(1); // Exit with an error code
   }
 
+  const kv = createClient({ url: process.env.KV_URL });
+
   console.log('Scraping process started...');
-  res.status(202).send('Scraping process initiated. Check server logs for status.');
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--single-process'
-      ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      headless: "new", // Use the new headless mode
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
@@ -34,17 +25,12 @@ app.get('/scrape', async (req, res) => {
 
     console.log('Page loaded. Extracting data...');
 
-    // --- Extract Data ---
     const data = await page.evaluate(() => {
       const getCleanText = (element) => element?.innerText.trim() || '';
 
-      // Profile Picture
       const profilePicture = document.querySelector('.pv-top-card-profile-picture__image')?.src || '';
-
-      // About section
       const aboutText = document.querySelector('.pv-about-section .inline-show-more-text')?.innerText.trim() || '';
 
-      // Experience Section
       const experienceItems = [];
       document.querySelectorAll('#experience ~ .pvs-list__outer-container > ul > li.artdeco-list__item').forEach(item => {
         const title = getCleanText(item.querySelector('.mr1.t-bold > span[aria-hidden="true"]'));
@@ -56,7 +42,6 @@ app.get('/scrape', async (req, res) => {
         }
       });
 
-      // Certifications Section
       const certificationItems = [];
       document.querySelectorAll('#licenses_and_certifications ~ .pvs-list__outer-container > ul > li.artdeco-list__item').forEach(item => {
         const title = getCleanText(item.querySelector('.mr1.t-bold > span[aria-hidden="true"]'));
@@ -85,14 +70,6 @@ app.get('/scrape', async (req, res) => {
 
   } catch (error) {
     console.error('An error occurred during scraping:', error);
+    process.exit(1); // Exit with an error code
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Scraper service listening on port ${PORT}`);
-});
-
-// Temporary debug endpoint
-app.get('/debug-env', (req, res) => {
-  res.send(`The secret key is: ${process.env.SCRAPE_SECRET_KEY}`);
-});
+})();
